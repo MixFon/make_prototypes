@@ -1,68 +1,75 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
-
+# Данная программа считывает файл, переданный вторым аргументом и формирует на осн-
+# ове этого файла прототипы функций, которые встречаются в этом файле. Эти прототи-
+# пы она записывате в конец файла .h, имя поторого нужно указать. Далее все функции
+# файла программа рапределяет по отдельным файлам, по пять функций на файл. 
 import sys
 
-def name_function(line):
-    name = ""
-    name = line[line.find("\t"):line.find("(")]
-    name = name.lstrip(' \t*')
-    name += ".c"
-    return name
+class Prototype:
+    prototypes = []
+    functions = []
+    name_files = []
+    func = ""
+    head = ""
 
-def write_prototyps(prototypes, name_files, head):
-    try:
-        out = open(head, "a")
-        print("\nВ файл " + head + " добавленны следующие прототипы:")
-        for i in range(len(name_files)):
-            if i % 5 == 0:
-                out.write("/*\n** File " + name_files[i] + "\n*/\n")
-            print(prototypes[i])
-            out.write(prototypes[i] + "\n")
-        out.close()
-    except IOError:
-        print("Ошибка открытия файла!")
-        exit(0)
+    def __init__(self):
+        if len(sys.argv) != 2:
+            print("Второй аргумент - имя файла в которм собираются прототипы.")
+            exit()
+        try:
+            f = open(sys.argv[1], 'r')
+            for line in f:
+                self.func += line
+                if line[0].isalpha():
+                    self.prototypes.append((line[:-1] + ";"))
+                    self.name_files.append(self.name_function(line)) 
+                if line[0] == '}':
+                    self.functions.append(self.func)
+                    self.func = ""
+            f.close()
+        except IOError:
+            print("Неверное имя файла!")
+            exit(0)
+        self.head = input("Введите имя файла .h\n")
+        self.write_prototyps()
+        self.write_funtions()
+        f.close()
 
+    def name_function(self, line):
+        name = ""
+        name = line[line.find("\t"):line.find("(")]
+        name = name.lstrip(' \t*')
+        name += ".c"
+        return name
 
-def write_funtions(prototypes, name_files, head):
-    try:
-        print("\nСозданы следующие файлы:")
-        for i in range(len(name_files)):
-            if i % 5 == 0:
-                print(name_files[i])
-                out = open(name_files[i], "w")
-                out.write("\n#include \"" + head + "\"\n\n")
-            out.write(functions[i])
-        out.close()
-    except IOError:
-        print("Ошибка открытия файла!")
-        exit(0)
+    def write_prototyps(self):
+        try:
+            out = open(self.head, "a")
+            print("\nВ файл " + self.head + " добавленны следующие прототипы:")
+            for i in range(len(self.name_files)):
+                if i % 5 == 0:
+                    out.write("/*\n** File " + self.name_files[i] + "\n*/\n")
+                print(self.prototypes[i])
+                out.write(self.prototypes[i] + "\n")
+            out.close()
+        except IOError:
+            print("Ошибка открытия файла!")
+            exit(0)
 
-if len(sys.argv) != 2:
-    print("Введите вторым аргументов название файла, в котором находите прототипы")
-    exit()
+    def write_funtions(self):
+        try:
+            print("\nСозданы следующие файлы:")
+            for i in range(len(self.name_files)):
+                if i % 5 == 0:
+                    print(self.name_files[i])
+                    out = open(self.name_files[i], "w")
+                    out.write("\n#include \"" + self.head + "\"\n\n")
+                out.write(self.functions[i])
+            out.close()
+        except IOError:
+            print("Ошибка открытия файла!")
+            exit(0)
 
-prototypes = []
-functions = []
-name_files = []
-func = ""
-try:
-    f = open(sys.argv[1], 'r')
-    for line in f:
-        func += line
-        if line[0].isalpha():
-            prototypes.append((line[:-1] + ";"))
-            name_files.append(name_function(line)) 
-        if line[0] == '}':
-            functions.append(func)
-            func = ""
-    f.close()
-except IOError:
-    print("Неверное имя файла!")
-    exit(0)
-
-head = input("Введите имя файла .h\n")
-write_prototyps(prototypes, name_files, head)
-write_funtions(functions, name_files, head)
-f.close()
+if __name__ == "__main__":
+    prot = Prototype()
