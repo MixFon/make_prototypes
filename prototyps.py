@@ -6,6 +6,7 @@
 # файла программа рапределяет по отдельным файлам, по пять функций на файл. 
 import sys
 
+
 class Prototype:
     prototypes = []
     functions = []
@@ -14,8 +15,9 @@ class Prototype:
     head = ""
 
     def __init__(self):
-        if len(sys.argv) != 2:
+        if len(sys.argv) != 3:
             print("Второй аргумент - имя файла в которм собираются прототипы.")
+            print("Третий аргумент - куда будут записаны прототипы")
             exit()
         try:
             f = open(sys.argv[1], 'r')
@@ -23,7 +25,7 @@ class Prototype:
                 self.func += line
                 if line[0].isalpha():
                     self.prototypes.append((line[:-1] + ";"))
-                    self.name_files.append(self.name_function(line)) 
+                    self.name_files.append(self.name_function(line))
                 if line[0] == '}':
                     self.functions.append(self.func)
                     self.func = ""
@@ -31,10 +33,10 @@ class Prototype:
         except IOError:
             print("Неверное имя файла!")
             exit(0)
-        self.head = input("Введите имя файла .h\n")
+        f.close()
+        self.head = sys.argv[2]
         self.write_prototyps()
         self.write_funtions()
-        f.close()
 
     def name_function(self, line):
         name = ""
@@ -70,6 +72,7 @@ class Prototype:
         except IOError:
             print("Ошибка открытия файла!")
             exit(0)
+
 
 if __name__ == "__main__":
     prot = Prototype()
